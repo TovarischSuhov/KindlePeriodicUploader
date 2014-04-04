@@ -18,4 +18,5 @@ nytprof.out
 *.o
 *.bs
 debian/files
-debian/kp_uploader*
+debian/kp-uploader*
+debian/kp_uploader/

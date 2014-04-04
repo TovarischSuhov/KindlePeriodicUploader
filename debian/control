@@ -7,5 +7,5 @@ Standards-Version: 3.9.2
 
 Package: kp-uploader
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, $(perl:Depends), libmime-lite-perl, liblog-dispatch-perl, libconfig-tiny-perl
+Depends: ${misc:Depends}, libmime-lite-perl, liblog-dispatch-perl, libconfig-tiny-perl
 Description: Task that gets periodic and send it to your kindle
