@@ -1,0 +1,105 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use utf8;
+
+use Config::Tiny;
+use MIME::Lite;
+use Log::Dispatch;
+use Log::Dispatch::File;
+use LWP::UserAgent;
+
+
+$MIME::Lite::AUTO_CONTENT_TYPE = 1;
+
+my $confname = '/etc/kp.conf';
+my $listname = '/etc/kp.lst';
+my %list;
+
+
+sub GetSend($$$);
+
+my $log = Log::Dispatch->new();
+
+$log->add(
+	Log::Dispatch::File->new(
+		name => 'log',
+		min_level => 'warning',
+		filename => '/var/log/kp.log'
+	)
+);
+
+my $conf = Config::Tiny->new();
+$conf = Config::Tiny->read($confname);
+if(! defined $conf){
+	$log->critical("Can't open config file $confname.\n");
+	exit 1;
+}
+$log->info("Reading config.\n");
+my $email = $conf->{_}->{email};
+my $password = $conf->{_}->{pass};
+my $kindle = $conf->{_}->{kindle};
+$log->info("Config is already read.\n");
+
+open my $lst, "<", $listname;
+if(! defined $lst){
+	$log->critical("Can't open list file $listname.\n");
+	exit 1;
+}
+
+$log->info("Start to read periodic list.\n");
+
+
+while(<$lst>){
+	/(\S+)\s+(\d+)/;
+	$list{$1}=$2;
+	my $tmpstr = $1;
+	my $key = $1;
+	$tmpstr =~ s/\%\%/$list{$key}/g;
+	$tmpstr =~ /([^\/]*?)$/;
+	my $name = $1;
+	$log->info("Starts to work with $tmpstr.\n");
+	GetSend $tmpstr, $name, $key;
+	$log->info("Finish to work with $tmpstr.\n");
+}
+
+close $lst;
+
+$log->info("Write new list file.\n");
+open $lst, ">", $listname;
+for my $x(keys %list){
+	print $lst "$x $list{$x}\n";
+}
+
+close $lst;
+
+sub GetSend($$$){
+	my $path = shift;
+	my $name = shift;
+	my $key = shift;
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(10);
+	$ua->env_proxy;
+	my $response = $ua->get($path);
+	if($response->is_success){
+        	open my $file, ">", "/tmp/$name";
+        	print $file $response->decoded_content;
+        	close $file;
+		$list{$key}++;
+		$log->info("Get $path.\n");
+	}
+	else{
+		$log->warning("There isn't $path. Maybe it's too early.\n");
+		return;
+	}
+	$email =~ /(.*)\@(.*)/;	
+	my $user = $1;
+        my $msg = MIME::Lite->new(
+        From => $email,
+        To => $kindle,
+        Path => "/tmp/$name" 
+	);  
+        $msg->send('smtp','smtp.yandex.ru', AuthUser=>$user, AuthPass=>$password);
+	$log->info("Message has been send.\n");
+}

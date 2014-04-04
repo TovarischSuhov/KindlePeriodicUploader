@@ -1,0 +1,11 @@
+Source: kp-uploader
+Section: misc
+Priority: extra
+Maintainer: Ilya Suhov <ilsuhov@yandex-team.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+
+Package: kp-uploader
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, $(perl:Depends), libmime-lite-perl, liblog-dispatch-perl, libconfig-tiny-perl
+Description: Task that gets periodic and send it to your kindle
