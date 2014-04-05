@@ -10,11 +10,11 @@
 #export DH_VERBOSE=1
 
 override_dh_install:
-	mkdir -p debian/kp_uploader/usr/bin
-	cp -r bin debian/kp_uploader/usr
-	mkdir -p debian/kp_uploader/etc
-	cp tmp.conf debian/kp_uploader/etc/kp.conf
-	cp tmp.lst debian/kp_uploader/etc/kp.lst
+	mkdir -p debian/kp-uploader/usr/bin
+	cp -r bin debian/kp-uploader/usr
+	mkdir -p debian/kp-uploader/etc
+	cp tmp.conf debian/kp-uploader/etc/kp.conf
+	cp tmp.lst debian/kp-uploader/etc/kp.lst
 	
 
 %:
