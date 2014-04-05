@@ -1,1 +1,1 @@
-* 0 * * * /usr/bin/kp_uploader
+0 * * * * /usr/bin/kp_uploader
